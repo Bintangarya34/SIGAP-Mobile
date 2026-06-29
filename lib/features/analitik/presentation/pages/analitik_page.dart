@@ -147,6 +147,10 @@ class _AnalitikPageState extends State<AnalitikPage> {
                   _buildHorizonDetailsCard(pred, _activeHorizon),
                   const SizedBox(height: 20.0),
 
+                  // Model Evaluation Card (New web-based update)
+                  _buildModelEvaluationCard(provider.comparisonData),
+                  const SizedBox(height: 20.0),
+
                   // Forecast Visual Bars (7 history + 5 predictions)
                   Text(
                     'Grafik Tinggi Air & Prediksi (cm)'.toUpperCase(),
@@ -376,6 +380,99 @@ class _AnalitikPageState extends State<AnalitikPage> {
           style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.bold),
         ),
       ],
+    );
+  }
+
+  Widget _buildModelEvaluationCard(Map<String, dynamic>? comparisonData) {
+    if (comparisonData == null || comparisonData.isEmpty) {
+      return BrutalCard(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Evaluasi Ketepatan Model AI'.toUpperCase(),
+              style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.grey.shade600),
+            ),
+            const Divider(thickness: 1.5, color: BrutalColors.border),
+            const SizedBox(height: 8.0),
+            Text('Mengambil data metrik ketepatan model...', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold)),
+          ],
+        ),
+      );
+    }
+
+    final diffsList = comparisonData['diffs'] as List<dynamic>? ?? [];
+    final diffs = diffsList.map((d) => double.tryParse(d.toString()) ?? 0.0).toList();
+    
+    double avgDiff = 0.0;
+    double accuracy = 0.0;
+    if (diffs.isNotEmpty) {
+      final sum = diffs.reduce((a, b) => a + b);
+      avgDiff = sum / diffs.length;
+      
+      final tepat = diffs.where((d) => d <= 15.0).length;
+      accuracy = (tepat / diffs.length) * 100;
+    }
+
+    return BrutalCard(
+      backgroundColor: Colors.white,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Evaluasi Ketepatan Model AI'.toUpperCase(),
+            style: GoogleFonts.inter(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: Colors.grey.shade600,
+            ),
+          ),
+          const Divider(thickness: 1.5, color: BrutalColors.border),
+          const SizedBox(height: 8.0),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Ketepatan (±15 cm)',
+                      style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.black54),
+                    ),
+                    const SizedBox(height: 4.0),
+                    Text(
+                      '${accuracy.toStringAsFixed(0)}%',
+                      style: GoogleFonts.inter(fontSize: 24, fontWeight: FontWeight.w900, color: BrutalColors.primary),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                width: 1.5,
+                height: 45,
+                color: BrutalColors.border,
+              ),
+              const SizedBox(width: 16.0),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Rata-rata Meleset',
+                      style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.black54),
+                    ),
+                    const SizedBox(height: 4.0),
+                    Text(
+                      '± ${avgDiff.toStringAsFixed(1)} cm',
+                      style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w900, color: BrutalColors.secondary),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

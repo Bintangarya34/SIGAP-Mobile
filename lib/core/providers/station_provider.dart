@@ -8,17 +8,19 @@ import '../services/cache_service.dart';
 class StationProvider extends ChangeNotifier {
   final ApiService _apiService = ApiService();
 
-  String _activeStationKey = 'lokasi3'; // Default Kalikobor
+  String _activeStationKey = 'lokasi2'; // Default UHT (prediction-optimized location)
   String get activeStationKey => _activeStationKey;
 
   // Storing data for all stations to allow global access (e.g. on the map)
   final Map<String, List<dynamic>> _allSensorData = {};
   final Map<String, Map<String, dynamic>> _allPredictionData = {};
+  final Map<String, Map<String, dynamic>> _allComparisonData = {};
   final Map<String, String> _stationStatuses = {};
   final Map<String, String> _predictedStatuses = {};
 
   List<dynamic> get sensorData => _allSensorData[_activeStationKey] ?? [];
   Map<String, dynamic>? get predictionData => _allPredictionData[_activeStationKey];
+  Map<String, dynamic>? get comparisonData => _allComparisonData[_activeStationKey];
   String get status => _stationStatuses[_activeStationKey] ?? "OFFLINE";
 
   Map<String, String> get allStationStatuses => _stationStatuses;
@@ -97,7 +99,16 @@ class StationProvider extends ChangeNotifier {
       _allPredictionData[key] = pData ?? {};
     }
 
-    // 3. Process status
+    // 3. Fetch Comparison metrics
+    Map<String, dynamic>? cData;
+    try {
+      cData = await _apiService.getComparisonData(key, meta.lokasiId);
+      _allComparisonData[key] = cData ?? {};
+    } catch (_) {
+      _allComparisonData[key] = {};
+    }
+
+    // 4. Process status
     String currentStatus = "OFFLINE";
     if (sData.isNotEmpty) {
       final latest = Map<String, dynamic>.from(sData.first as Map);
@@ -139,7 +150,7 @@ class StationProvider extends ChangeNotifier {
       );
     }
 
-    // 4. Process predicted status (using the 6H forecast for warning overlays)
+    // 5. Process predicted status (using the 6H forecast for warning overlays)
     String predictedStatus = currentStatus;
     if (pData != null && pData['prediksi'] != null) {
       final forecast = pData['prediksi']['6'] ?? {}; // check 6H horizon

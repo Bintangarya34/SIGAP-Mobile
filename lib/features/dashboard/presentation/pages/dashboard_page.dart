@@ -5,7 +5,6 @@ import '../../../../core/constants/ref_heights.dart';
 import '../../../../core/providers/station_provider.dart';
 import '../../../../core/widgets/brutal_card.dart';
 import '../../../../core/widgets/brutal_button.dart';
-import '../../../../core/widgets/status_badge.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../analitik/presentation/pages/analitik_page.dart';
 import '../../../map/presentation/pages/map_page.dart';
@@ -166,11 +165,13 @@ class _DashboardHomeContentState extends State<DashboardHomeContent> {
               final od1 = double.tryParse(oldest['distance1']?.toString() ?? '') ?? 0.0;
               final od2 = double.tryParse(oldest['distance2']?.toString() ?? '') ?? 0.0;
               if (station.key == 'lokasi3') {
-                if (od2 > 10 && od2 < 600) oldestDistance = od2;
-                else if (od1 > 10 && od1 < 600) oldestDistance = od1;
+                if (od2 > 10 && od2 < 600) {
+                  oldestDistance = od2;
+                } else if (od1 > 10 && od1 < 600) oldestDistance = od1;
               } else {
-                if (od1 > 10 && od1 < 600) oldestDistance = od1;
-                else if (od2 > 10 && od2 < 600) oldestDistance = od2;
+                if (od1 > 10 && od1 < 600) {
+                  oldestDistance = od1;
+                } else if (od2 > 10 && od2 < 600) oldestDistance = od2;
               }
               if (oldestDistance != null) {
                 oldestTinggiAir = station.refHeight - oldestDistance;
@@ -212,7 +213,7 @@ class _DashboardHomeContentState extends State<DashboardHomeContent> {
           // Calculate trend from oldest in current window
           double trendDiff = tinggiAir - oldestTinggiAir;
           String trendSign = trendDiff >= 0 ? "+" : "";
-          String trendStr = "${trendSign}${trendDiff.toStringAsFixed(1)} cm dari beberapa menit lalu";
+          String trendStr = "$trendSign${trendDiff.toStringAsFixed(1)} cm dari beberapa menit lalu";
 
           return RefreshIndicator(
             onRefresh: () => provider.fetchData(),
@@ -482,7 +483,7 @@ class _DashboardHomeContentState extends State<DashboardHomeContent> {
             right: 0,
             height: 60 * capPercent,
             child: Container(
-              color: fillCol.withOpacity(0.15),
+              color: fillCol.withValues(alpha: 0.15),
             ),
           ),
           Column(

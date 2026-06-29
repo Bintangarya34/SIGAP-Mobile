@@ -113,7 +113,7 @@ class _MapPageState extends State<MapPage> {
                             height: 45.0,
                             child: Container(
                               decoration: BoxDecoration(
-                                color: Colors.blue.withOpacity(0.2),
+                                color: Colors.blue.withValues(alpha: 0.2),
                                 shape: BoxShape.circle,
                                 border: Border.all(color: Colors.blue, width: 2.0),
                               ),
@@ -148,7 +148,7 @@ class _MapPageState extends State<MapPage> {
                               ),
                             ),
                           );
-                        }).toList(),
+                        }),
                       ],
                     ),
                   ],
@@ -380,7 +380,7 @@ class _PulsingSensorMarkerState extends State<PulsingSensorMarker>
                     height: 36 + (20 * _controller.value),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: BrutalColors.danger.withOpacity(0.4 * (1 - _controller.value)),
+                      color: BrutalColors.danger.withValues(alpha: 0.4 * (1 - _controller.value)),
                     ),
                   );
                 },

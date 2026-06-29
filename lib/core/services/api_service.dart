@@ -93,4 +93,17 @@ class ApiService {
       return [];
     }
   }
+
+  Future<Map<String, dynamic>?> getComparisonData(String stationKey, int lokasiId) async {
+    try {
+      final response = await _dio.get('/api/perbandingan', queryParameters: {'lokasi': lokasiId});
+      if (response.statusCode == 200) {
+        return Map<String, dynamic>.from(response.data);
+      }
+      return null;
+    } catch (e) {
+      print("Get comparison error: $e");
+      return null;
+    }
+  }
 }
