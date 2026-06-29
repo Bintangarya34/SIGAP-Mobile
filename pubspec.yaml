@@ -1,0 +1,52 @@
+name: sigap_mobile
+description: Aplikasi Mobile Sistem Peringatan Dini Banjir SIGAP
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # State Management
+  provider: ^6.1.2
+
+  # Networking
+  dio: ^5.4.3
+
+  # Offline Local Storage
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+
+  # Geolocation & Maps
+  geolocator: ^11.0.0
+  flutter_map: ^6.1.0
+  latlong2: ^0.9.0
+
+  # Notifications
+  flutter_local_notifications: ^17.1.2
+
+  # Camera & Gallery Access
+  image_picker: ^1.0.7
+
+  # Utility & Design
+  google_fonts: ^6.2.1
+  intl: ^0.19.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.1
+  hive_generator: ^2.0.1
+  build_runner: ^2.4.9
+  flutter_launcher_icons: ^0.13.1
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "logo.jpeg"
+  remove_alpha_ios: true
+
+flutter:
+  uses-material-design: true
