@@ -116,25 +116,49 @@ class StationProvider extends ChangeNotifier {
       final d2 = double.tryParse(latest['distance2']?.toString() ?? '') ?? 0.0;
       double? dist;
 
-      if (key == 'lokasi3') {
-        if (d2 > 10 && d2 < 600) dist = d2;
-        else if (d1 > 10 && d1 < 600) dist = d1;
-      } else {
-        if (d1 > 10 && d1 < 600) dist = d1;
-        else if (d2 > 10 && d2 < 600) dist = d2;
+      if (key == 'lokasi1') { // Kalikobor (swapped key)
+        if (d2 > 10 && d2 < 600) {
+          dist = d2;
+        } else if (d1 > 10 && d1 < 600) dist = d1;
+      } else { // Pucanganom (lokasi3) & UHT (lokasi2)
+        if (d1 > 10 && d1 < 600) {
+          dist = d1;
+        } else if (d2 > 10 && d2 < 600) dist = d2;
+      }
+
+      // Check if telemetry timestamp is fresh (offline if older than 60 minutes)
+      if (latest['waktu'] != null) {
+        try {
+          final DateTime dataTime = DateTime.parse(latest['waktu'].toString());
+          final DateTime now = DateTime.now();
+          final int diffMinutes = now.difference(dataTime).inMinutes.abs();
+          if (diffMinutes > 60) {
+            dist = null; // Force offline
+          }
+        } catch (_) {}
       }
 
       if (dist != null) {
         final tAir = meta.refHeight - dist;
-        if (tAir >= meta.siagaThreshold) {
+        // Waspada & Siaga threshold heights (cm)
+        double waspadaH = meta.refHeight - meta.waspadaThreshold;
+        double siagaH = meta.refHeight - meta.siagaThreshold;
+        
+        // For UHT: override local thresholds to official web values
+        if (meta.lokasiId == 2) {
+          waspadaH = 150.0;
+          siagaH = 190.0;
+        }
+
+        if (tAir >= siagaH) {
           currentStatus = "SIAGA";
-        } else if (tAir >= meta.waspadaThreshold) {
+        } else if (tAir >= waspadaH) {
           currentStatus = "WASPADA";
         } else {
           currentStatus = "AMAN";
         }
       } else {
-        currentStatus = "GLITCH";
+        currentStatus = "OFFLINE";
       }
     }
     
@@ -150,10 +174,15 @@ class StationProvider extends ChangeNotifier {
       );
     }
 
-    // 5. Process predicted status (using the 6H forecast for warning overlays)
+    // 5. Process predicted status (using the 3H forecast or current offline status)
     String predictedStatus = currentStatus;
-    if (pData != null && pData['prediksi'] != null) {
-      final forecast = pData['prediksi']['6'] ?? {}; // check 6H horizon
+    if (currentStatus == "OFFLINE") {
+      predictedStatus = "OFFLINE";
+    } else if (pData != null && pData['sekarang'] != null && pData['sekarang']['status'] == 'OFFLINE') {
+      currentStatus = "OFFLINE";
+      predictedStatus = "OFFLINE";
+    } else if (pData != null && pData['prediksi'] != null) {
+      final forecast = pData['prediksi']['3'] ?? {}; // check 3H horizon
       predictedStatus = forecast['status'] ?? currentStatus;
     }
     _predictedStatuses[key] = predictedStatus;

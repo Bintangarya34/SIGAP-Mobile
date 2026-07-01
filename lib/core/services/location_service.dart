@@ -16,9 +16,9 @@ class StationLocation {
 
 class LocationService {
   static final List<StationLocation> stations = [
-    StationLocation(key: "lokasi1", name: "Pucanganom", latitude: -7.28498, longitude: 112.802923),
-    StationLocation(key: "lokasi2", name: "UHT", latitude: -7.290753, longitude: 112.793255),
-    StationLocation(key: "lokasi3", name: "Kalikobor", latitude: -7.286943, longitude: 112.755689),
+    StationLocation(key: "lokasi1", name: "Kalikobor", latitude: -7.2850000, longitude: 112.802806),
+    StationLocation(key: "lokasi2", name: "UHT", latitude: -7.2907778, longitude: 112.793278),
+    StationLocation(key: "lokasi3", name: "Pucanganom", latitude: -7.2869071, longitude: 112.7556923),
   ];
 
   static Future<Position?> getCurrentPosition() async {

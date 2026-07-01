@@ -151,12 +151,10 @@ class _DashboardHomeContentState extends State<DashboardHomeContent> {
           double tinggiAir = 0.0;
           double oldestTinggiAir = 0.0;
           String status = "OFFLINE";
-          String waktuStr = "-";
           double d1 = 0.0;
           double d2 = 0.0;
 
           if (latest != null) {
-            waktuStr = latest['waktu'] ?? latest['time'] ?? '-';
             d1 = double.tryParse(latest['distance1']?.toString() ?? '') ?? 0.0;
             d2 = double.tryParse(latest['distance2']?.toString() ?? '') ?? 0.0;
 
@@ -164,11 +162,11 @@ class _DashboardHomeContentState extends State<DashboardHomeContent> {
             if (oldest != null) {
               final od1 = double.tryParse(oldest['distance1']?.toString() ?? '') ?? 0.0;
               final od2 = double.tryParse(oldest['distance2']?.toString() ?? '') ?? 0.0;
-              if (station.key == 'lokasi3') {
+              if (station.key == 'lokasi1') { // Kalikobor (swapped key)
                 if (od2 > 10 && od2 < 600) {
                   oldestDistance = od2;
                 } else if (od1 > 10 && od1 < 600) oldestDistance = od1;
-              } else {
+              } else { // Pucanganom (lokasi3) & UHT (lokasi2)
                 if (od1 > 10 && od1 < 600) {
                   oldestDistance = od1;
                 } else if (od2 > 10 && od2 < 600) oldestDistance = od2;
@@ -178,15 +176,13 @@ class _DashboardHomeContentState extends State<DashboardHomeContent> {
               }
             }
 
-            if (station.key == 'lokasi3') {
-              // Kalikobor fallback to distance2
+            if (station.key == 'lokasi1') { // Kalikobor (swapped key)
               if (d2 > 10 && d2 < 600) {
                 distance = d2;
               } else if (d1 > 10 && d1 < 600) {
                 distance = d1;
               }
-            } else {
-              // Pucanganom & UHT
+            } else { // Pucanganom (lokasi3) & UHT (lokasi2)
               if (d1 > 10 && d1 < 600) {
                 distance = d1;
               } else if (d2 > 10 && d2 < 600) {
@@ -194,19 +190,39 @@ class _DashboardHomeContentState extends State<DashboardHomeContent> {
               }
             }
 
+            // Check if telemetry timestamp is fresh (offline if older than 60 minutes)
+            if (latest['waktu'] != null) {
+              try {
+                final DateTime dataTime = DateTime.parse(latest['waktu'].toString());
+                final DateTime now = DateTime.now();
+                final int diffMinutes = now.difference(dataTime).inMinutes.abs();
+                if (diffMinutes > 60) {
+                  distance = null; // Force offline
+                }
+              } catch (_) {}
+            }
+
             if (distance != null) {
               tinggiAir = station.refHeight - distance;
               tinggiAir = tinggiAir < 0 ? 0 : tinggiAir;
 
-              if (tinggiAir >= station.siagaThreshold) {
+              double waspadaH = station.refHeight - station.waspadaThreshold;
+              double siagaH = station.refHeight - station.siagaThreshold;
+
+              if (station.lokasiId == 2) { // UHT
+                waspadaH = 150.0;
+                siagaH = 190.0;
+              }
+
+              if (tinggiAir >= siagaH) {
                 status = "SIAGA";
-              } else if (tinggiAir >= station.waspadaThreshold) {
+              } else if (tinggiAir >= waspadaH) {
                 status = "WASPADA";
               } else {
                 status = "AMAN";
               }
             } else {
-              status = "GLITCH";
+              status = "OFFLINE";
             }
           }
 
